@@ -41,6 +41,7 @@ def main():
     pacman=Pacman(200,200)
     food=Food()
     run=True
+    score=0
     while run:
 
         screen.fill("black")
@@ -53,9 +54,14 @@ def main():
         pacman.move(keys)
         distance=((pacman.x-food.x)**2+(pacman.y-food.y)**2)**0.5
         if distance < pacman.radius + food.radius:
+            score= score+1
+            print(score)
             food=Food()
         pacman.draw()
         food.draw()
+        font=pygame.font.SysFont(None,36)
+        scoretext=font.render("score :"+str(score),True,"blue")
+        screen.blit(scoretext,(50,50))
         pygame.display.update()
 
 main()
