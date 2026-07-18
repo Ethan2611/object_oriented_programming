@@ -56,8 +56,13 @@ def main():
         if distance < pacman.radius + food.radius:
             score= score+1
             if score==10:
-                print("GAME OVER")
-                exit()
+                screen.fill("red")
+                font=pygame.font.SysFont("Arial",30)
+                text=font.render("GAME OVER",True,"black")
+                screen.blit(text,(45,75))
+                pygame.display.update()
+
+
             print(score)
             food=Food()
         pacman.draw()
