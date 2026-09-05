@@ -1,0 +1,115 @@
+import pygame
+import os
+from pygame.locals import *
+
+pygame.mixer.init()
+pygame.init()
+
+screen = pygame.display.set_mode((1000, 700))
+bg = pygame.image.load("Space Invaders/ocean3.jpg")
+pygame.display.set_caption("Ship Invaders")
+
+ship1 = pygame.image.load("Space Invaders/pirate1.jpg")
+ship2 = pygame.image.load("Space Invaders/pirate2.png")
+red_ship = pygame.transform.scale(ship1, (60, 40))
+yellow_ship = pygame.transform.scale(ship2, (60, 40))
+
+RED_HIT = pygame.USEREVENT + 1
+YELLOW_HIT = pygame.USEREVENT + 2
+
+yellow_score = 0
+red_score = 0
+font = pygame.font.SysFont("Arial", 30)
+
+def draw_window(red_bullet, yellow_bullet):
+    screen.blit(bg, (0, 0))
+    screen.blit(red_ship, (red.x, red.y))
+    screen.blit(yellow_ship, (yellow.x, yellow.y))
+    
+    for i in red_bullet:
+        pygame.draw.rect(screen, "red", i)
+    for i in yellow_bullet:
+        pygame.draw.rect(screen, "yellow", i)
+        
+    show_score(10, 10)
+    pygame.display.update()
+
+def red_ship_movement(keypress, red):
+    if keypress[pygame.K_LEFT]:
+        red.x -= 3
+    if keypress[pygame.K_RIGHT]:
+        red.x += 3
+    if keypress[pygame.K_UP]:
+        red.y -= 3
+    if keypress[pygame.K_DOWN]:
+        red.y += 3
+
+def yel_ship_movement(keypress, yellow):
+    if keypress[pygame.K_a]:
+        yellow.x -= 3
+    if keypress[pygame.K_d]:
+        yellow.x += 3
+    if keypress[pygame.K_w]:
+        yellow.y -= 3
+    if keypress[pygame.K_s]:
+        yellow.y += 3
+
+def handle_bullets(yellow_bullet, red_bullet, yellow, red):
+    global red_score, yellow_score
+    
+    # Red bullets move left and target yellow ship
+    for i in red_bullet[:]:
+        i.x -= 7
+        if yellow.colliderect(i):
+            pygame.event.post(pygame.event.Event(YELLOW_HIT))
+            red_score += 1
+            red_bullet.remove(i)
+        elif i.x < 0:
+            red_bullet.remove(i)
+
+    # Yellow bullets move right and target red ship
+    for i in yellow_bullet[:]:
+        i.x += 7
+        if red.colliderect(i):
+            pygame.event.post(pygame.event.Event(RED_HIT))
+            yellow_score += 1
+            yellow_bullet.remove(i)
+        elif i.x > 1000:
+            yellow_bullet.remove(i)
+
+red = pygame.Rect(900, 300, 60, 90)
+yellow = pygame.Rect(100, 300, 60, 90)
+red_bullet = []
+yellow_bullet = []
+
+def show_score(x, y):
+    score_text = f"Yellow Score: {yellow_score}   Red Score: {red_score}"
+    score = font.render(score_text, True, (255, 255, 255))
+    screen.blit(score, (x, y))
+
+clock = pygame.time.Clock()
+run = True
+
+while run:
+    clock.tick(60)
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            run = False
+            
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_RSHIFT:
+                # Red bullet starts from left side of red ship
+                bullet = pygame.Rect(red.x, red.y + red.height // 2 - 2, 10, 5)
+                red_bullet.append(bullet)
+            if event.key == pygame.K_LSHIFT:
+                # Yellow bullet starts from right side of yellow ship
+                bullet = pygame.Rect(yellow.x + yellow.width, yellow.y + yellow.height // 2 - 2, 10, 5)
+                yellow_bullet.append(bullet)
+
+    keypress = pygame.key.get_pressed()
+    red_ship_movement(keypress, red)
+    yel_ship_movement(keypress, yellow)
+    handle_bullets(yellow_bullet, red_bullet, yellow, red)
+    draw_window(red_bullet, yellow_bullet)
+
+pygame.quit()
